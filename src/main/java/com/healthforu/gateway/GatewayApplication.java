@@ -1,5 +1,8 @@
 package com.healthforu.gateway;
 
+import com.healthforu.gateway.filter.JwtFilter;
+import io.jsonwebtoken.Jwt;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -9,8 +12,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
+import static java.util.Locale.filter;
+
 @SpringBootApplication
+@RequiredArgsConstructor
 public class GatewayApplication {
+    private final JwtFilter jwtFilter;
 
     public static void main(String[] args) {
         SpringApplication.run(GatewayApplication.class, args);
@@ -20,12 +27,23 @@ public class GatewayApplication {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("auth-service-v1", r -> r.path("/api/v1/auth/**")
-                        .filters(f -> f.rewritePath("/api/v1/auth/(?<segment>.*)", "/api/${segment}"))// 헬스포유 웹사이트 들어갈때
+                .route("auth-public-service-v1", r -> r.path("/api/v1/auth/**")
+                        .filters(f -> f.rewritePath("/api/v1/auth/(?<segment>.*)", "/api/auth/${segment}"))
                         .uri("http://localhost:8081"))
 
-                .route("health-service-v1", r -> r.path("/api/v1/health/**")
+                .route("user-private-service-v1", r -> r.path("/api/v1/users/**")
+                        .filters(f -> f.rewritePath("/api/v1/users/(?<segment>.*)", "/api/users/${segment}")
+                                .filter(jwtFilter.apply(new JwtFilter.Config())))
+                        .uri("http://localhost:8081"))
+
+                .route("health-public-service-v1", r -> r.path("/api/v1/health/diseases/**", "/api/v1/health/recipes/**")
                         .filters(f -> f.rewritePath("/api/v1/health/(?<segment>.*)", "/api/${segment}"))
+                        .uri("http://localhost:8082"))
+
+
+                .route("health-private-service-v1", r -> r.path("/api/v1/health/favorites/**")
+                        .filters(f -> f.rewritePath("/api/v1/health/(?<segment>.*)", "/api/${segment}")
+                                .filter(jwtFilter.apply(new JwtFilter.Config())))
                         .uri("http://localhost:8082"))
 
                 .route("frontend", r -> r.path("/**")
