@@ -1,22 +1,19 @@
-FROM gradle:8.6.0-jdk21-jammy AS builder
+FROM maven:3.9.6-eclipse-temurin-21-jammy AS builder
 
+# 작업 디렉토리 설정
 WORKDIR /app
 
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
 COPY src ./src
-COPY .mvn ./.mvn
 
-RUN ./gradlew clean build -x test
-
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "app.jar"]
