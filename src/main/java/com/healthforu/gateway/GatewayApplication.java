@@ -33,25 +33,25 @@ public class GatewayApplication {
         return builder.routes()
                 .route("auth-public-service-v1", r -> r.path("/api/v1/auth/**")
                         .filters(f -> f.rewritePath("/api/v1/auth/(?<segment>.*)", "/api/auth/${segment}"))
-                        .uri("http://localhost:8081"))
+                        .uri("http://auth-service:8081"))
 
                 .route("user-private-service-v1", r -> r.path("/api/v1/users/**")
                         .filters(f -> f.rewritePath("/api/v1/users/(?<segment>.*)", "/api/users/${segment}")
                                 .filter(jwtFilter.apply(new JwtFilter.Config())))
-                        .uri("http://localhost:8081"))
+                        .uri("http://auth-service:8081"))
 
                 .route("health-public-service-v1", r -> r.path("/api/v1/health/diseases/**", "/api/v1/health/recipes/**")
                         .filters(f -> f.rewritePath("/api/v1/health/(?<segment>.*)", "/api/${segment}"))
-                        .uri("http://localhost:8082"))
+                        .uri("http://health-service:8082"))
 
 
                 .route("health-private-service-v1", r -> r.path("/api/v1/health/favorites/**")
                         .filters(f -> f.rewritePath("/api/v1/health/(?<segment>.*)", "/api/${segment}")
                                 .filter(jwtFilter.apply(new JwtFilter.Config())))
-                        .uri("http://localhost:8082"))
+                        .uri("http://health-service:8082"))
 
                 .route("frontend", r -> r.path("/**")
-                        .uri("http://localhost:5173"))
+                        .uri("http://front-service:80"))
                 .build();
     }
 
