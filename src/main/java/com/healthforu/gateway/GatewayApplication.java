@@ -1,8 +1,8 @@
 package com.healthforu.gateway;
 
 import com.healthforu.gateway.filter.JwtFilter;
-import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -12,11 +12,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import static java.util.Locale.filter;
+import java.util.List;
+
 
 @SpringBootApplication
 @RequiredArgsConstructor
 public class GatewayApplication {
+    @Value("${ec2.public.ip}")
+    private String ec2PublicIp;
+
     private final JwtFilter jwtFilter;
 
     public static void main(String[] args) {
@@ -55,6 +59,7 @@ public class GatewayApplication {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // 쿠키/인증 정보 허용
+        config.setAllowedOrigins(List.of("http://" + ec2PublicIp));
         config.addAllowedOrigin("http://localhost:5173"); // 프론트 주소
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod("*"); // GET, POST, PUT, DELETE 모두 허용
