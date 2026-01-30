@@ -50,8 +50,6 @@ public class GatewayApplication {
                                 .filter(jwtFilter.apply(new JwtFilter.Config())))
                         .uri("http://health-service:8082"))
 
-                .route("frontend", r -> r.path("/**")
-                        .uri("http://front-service:80"))
                 .build();
     }
 
