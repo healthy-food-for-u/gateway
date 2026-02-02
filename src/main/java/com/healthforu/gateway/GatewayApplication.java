@@ -36,7 +36,7 @@ public class GatewayApplication {
                                 .filter(jwtFilter.apply(new JwtFilter.Config())))
                         .uri("http://localhost:8081"))
 
-                .route("health-public-service-v1", r -> r.path("/api/v1/health/diseases/**", "/api/v1/health/recipes/**")
+                .route("health-public-service-v1", r -> r.path("/api/v1/health/diseases/**", "/api/v1/health/recipes/**", "/api/v1/health/users/**")
                         .filters(f -> f.rewritePath("/api/v1/health/(?<segment>.*)", "/api/${segment}"))
                         .uri("http://localhost:8082"))
 
